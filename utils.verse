@@ -295,16 +295,6 @@ ClearHud(Player:player):void=
                 PlayerUI.HideHUDElements(HudElementsToHide)
                 PlayerUI.HideHUDElements(HudInteractionElements)
 
-# Inventory Functions #
-
-# Fetches the inventory for a player and main device
-FetchInv(Agent:agent, MainDevice:Main):?Inventory=
-    if(Player:=player[Agent], InvDB:= PlayerProfileDataMap[Player].Inv):
-        Inv:= DBToStorage(InvDB, Player, MainDevice)
-        Inv.Init()
-        return option{Inv}
-    else:
-        false
 
 # Math Functions #
 
@@ -386,3 +376,36 @@ FetchInv(Agent:agent, MainDevice:Main):?Inventory=
 # Moves a vector up by a specified amount
 (Translation:vector3).Up(Amount:float)<transacts>:vector3=
     return vector3{X:=Translation.X, Y:=Translation.Y, Z:=Translation.Z+ Amount}
+#sorting
+(Input:[]t where t:type).QuickSort<public>(CompareFunction(Element1:t, Element2:t)<transacts>:int)<transacts>:[]t = 
+
+    if (Input.Length <= 1):
+        return Input
+
+    var Less : []t = array {}
+    var Equal : []t = array {}
+    var Greater : []t = array {}
+
+    if (Pivot := Input[Int[Input.Length * 0.5]]):
+        for (Element : Input):
+            Result := CompareFunction(Element, Pivot)
+            ArrayElement := array { Element }
+            if (Result < 0):
+                set Less += ArrayElement
+            else if (Result > 0):
+                set Greater += ArrayElement
+            else:
+                set Equal += ArrayElement
+
+    Less.QuickSort(CompareFunction) + Equal + Greater.QuickSort(CompareFunction)
+
+SortFunction(Element1: int, Element2: int)<transacts>: int =
+    if (Element1 < Element2):
+        1
+    else if (Element1 > Element2):
+        -1
+    else:
+        0
+
+(Input:[]t where t:type).Reverse()<computes>:[]t=
+    for (Index -> Unused : Input, Element := Input[Input.Length - Index - 1]). Element
