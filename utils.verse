@@ -36,6 +36,7 @@ CalculatePointNonPlayer(Transform:transform, DistanceAmp:float, Direction:string
     
     return vector3{}
 
+
 # Prints a vector with an optional message
 (V:vector3).Print(?Msg:string):void=
     Print("{Msg} X:={V.X}, Y:={V.Y}, Z:={V.Z} ")
@@ -172,11 +173,12 @@ ManhattenDistance(V1:vector3, V2:vector3)<transacts>:float=
     return Abs(V1.X-V2.X) + Abs(V1.Y - V2.Y) +  Abs(V1.Z - V2.Z)
 
 # Spawns a target prop at a given position with optional scale and rotation
-SpawnTarget(Position:vector3, Prop: creative_prop_asset, ?Scale:vector3 = vector3{X:=1.0,Y:=1.0,Z:=1.0}, ?Rotation:rotation=IdentityRotation() ):creative_prop=
+SpawnTarget(Position:vector3, Prop: creative_prop_asset, ?Scale:vector3 = vector3{X:=1.0,Y:=1.0,Z:=1.0}, ?Rotation:rotation=IdentityRotation() )<transacts>:creative_prop=
     var LocalProp:creative_prop = creative_prop{}
     if (SpawnedProp := SpawnProp(Prop, transform{Translation:=Position, Rotation:= Rotation, Scale:=Scale})(0)?):
         set LocalProp =SpawnedProp
-
+    else:
+        Print("Failed to spawn prop")
     return LocalProp
 
 # Removes a visual effect with an optional delay
@@ -197,7 +199,7 @@ Spawnable_slime_adio:=class(tag){}
     IsBetween = true
 
 # Generates a random UUID
-GenerateUUID():string=
+GenerateUUID()<transacts>:string=
     Chars:[]char = {'I', 'e', '9', 'm', 'P', 'T', 'b', '0', 'W', 'M', 'Z', 'T', 'T', 'H', 'I', '9', 'E', 'j', 'p', 'i', 'p', 'D', 'b', 'G', 'o', 'f', 'o', 'e', 'U', '7', 'A', 'U', 'G', 'E', 'L', 'p', '8', 'Q', 'q', 'l', 'z', 'k', 'H', '0', 'T', '9', 'r', 'H', 'w', 'f'}
 
     var UUID:string = ""
@@ -206,6 +208,76 @@ GenerateUUID():string=
             set UUID+= "{Char}"
 
     return UUID
+
+(S:string).GetIntValue()<transacts>:int=
+    var TotalValue:int = 0
+    for(C:S):
+        set TotalValue+= C.GetIntValue()
+    return TotalValue
+    
+(C:char).GetIntValue()<transacts>:int=
+    return case(C):
+        '0'=>0
+        '1'=>1
+        '2'=>2
+        '3'=>3
+        '4'=>4
+        '5'=>5
+        '6'=>6
+        '7'=>7
+        '8'=>8
+        '9'=>9
+        'I'=>73
+        'e'=>101
+        '9'=>57
+        'm'=>109
+        'P'=>80
+        'T'=>84
+        'b'=>98
+        '0'=>48
+        'W'=>87
+        'M'=>77
+        'Z'=>90
+        'T'=>84
+        'T'=>84
+        'H'=>72
+        'I'=>73
+        '9'=>57
+        'E'=>69
+        'j'=>106
+        'p'=>112
+        'i'=>105
+        'p'=>112
+        'D'=>68
+        'b'=>98
+        'G'=>71
+        'o'=>111
+        'f'=>102
+        'o'=>111
+        'e'=>101
+        'U'=>85
+        '7'=>55
+        'A'=>65
+        'U'=>85
+        'G'=>71
+        'E'=>69
+        'L'=>76
+        'p'=>112
+        '8'=>56
+        'Q'=>81
+        'q'=>113
+        'l'=>108
+        'z'=>122
+        'k'=>107
+        'H'=>72
+        '0'=>48
+        'T'=>84
+        '9'=>57
+        'r'=>114
+        'H'=>72
+        'w'=>119
+        'f'=>102
+        _=>0
 
 # Generates a random vector3 within a specified range
 GetRandomVector3(Lower:vector3, Upper:vector3):vector3=
@@ -376,6 +448,14 @@ ClearHud(Player:player):void=
 # Moves a vector up by a specified amount
 (Translation:vector3).Up(Amount:float)<transacts>:vector3=
     return vector3{X:=Translation.X, Y:=Translation.Y, Z:=Translation.Z+ Amount}
+
+(Translation:vector3).IsEqual(V:vector3)<transacts>:logic=
+    var isEqual:logic = false
+    if(Translation.X = V.X and Translation.Y = V.Y and Translation.Z = V.Z):
+        Print("Equal")
+        set isEqual = true
+    return isEqual
+
 #sorting
 (Input:[]t where t:type).QuickSort<public>(CompareFunction(Element1:t, Element2:t)<transacts>:int)<transacts>:[]t = 
 
@@ -407,5 +487,23 @@ SortFunction(Element1: int, Element2: int)<transacts>: int =
     else:
         0
 
+
 (Input:[]t where t:type).Reverse()<computes>:[]t=
     for (Index -> Unused : Input, Element := Input[Input.Length - Index - 1]). Element
+
+
+(Input:[]t where t:type).Get(Index:int, Default:t)<computes>:t=
+    if(Element:= Input[Index]):
+        return Element
+    return Default
+
+(Input:[string]t where t:type).Get(Key:string, Default:t)<computes>:t=
+    if(Element:= Input[Key]):
+        return Element
+    return Default
+
+(Input:[string]t where t:type).ContainsKey(KeyToCheck:string)<transacts>:logic=
+    for(Key->Value:Input):
+        if(Key = KeyToCheck):
+            return true
+    return false
